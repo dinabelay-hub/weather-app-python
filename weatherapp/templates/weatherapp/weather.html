@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather Forecast</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'weatherapp/weather.css' %}">
+</head>
+<body>
+  <div class="container">
+    <header class="top-bar">
+      <button id="darkModeToggle">Toggle Mode</button>
+      <form method="post" class="city-form">
+        <input type="text" name="city" placeholder="Enter city" required>
+        <button type="submit">Get Weather</button>
+      </form>
+    </header>
+
+    <section class="weather-info">
+      <h1>Weather in {{ city|title }}</h1>
+      <div class="main-info">
+        <img src="http://openweathermap.org/img/wn/{{ icon }}@2x.png" alt="weather icon">
+        <div class="info-text">
+          <p><strong>Temperature:</strong> {{ temp }}°C</p>
+          <p><strong>Condition:</strong> {{ description }}</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="details">
+      <div class="box">
+        <p><strong>Feels Like:</strong> {{ feels_like }}°C</p>
+        <p><strong>Humidity:</strong> {{ humidity }}%</p>
+        <p><strong>Pressure:</strong> {{ pressure }} hPa</p>
+        <p><strong>Wind:</strong> {{ wind_speed }} m/s at {{ wind_deg }}°</p>
+      </div>
+      <div class="box">
+        <p><strong>Visibility:</strong> {{ visibility }} m</p>
+        <p><strong>Cloudiness:</strong> {{ cloudiness }}%</p>
+        <p><strong>Sunrise:</strong> {{ sunrise }}</p>
+        <p><strong>Sunset:</strong> {{ sunset }}</p>
+        <p><strong>Precipitation:</strong> {{ precipitation }}</p>
+        <p><strong>UV Index:</strong> {{ uv_index }}</p>
+      </div>
+    </section>
+
+    <section class="suggestion">
+      <h2>Suggested Activity</h2>
+      <p>{% if suggestion %}{{ suggestion }}{% else %}No specific suggestion today. Take it easy or explore the city!{% endif %}</p>
+    </section>
+
+    <section class="forecast">
+      <h2>Weekly Forecast</h2>
+      <div class="forecast-grid">
+        {% for day in forecast_list %}
+        <div class="forecast-card">
+          <p class="day-name">{{ day.day_name }}</p>
+          <p class="date">{{ day.date }}</p>
+          <img src="http://openweathermap.org/img/wn/{{ day.icon }}@2x.png" alt="icon">
+          <p class="temp">{{ day.temp }}°C</p>
+          <p class="desc">{{ day.description }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="chart">
+      <h2>Temperature Forecast</h2>
+      <canvas id="tempChart"></canvas>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="weather.js"></script>
+</body>
+</html>
