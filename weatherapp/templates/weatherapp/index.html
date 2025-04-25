@@ -5,38 +5,54 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Weather App</title>
+
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" />
+
+  <!-- Base Styling -->
   <style>
     body {
       font-family: 'Poppins', sans-serif;
+      background-image: url("{% static 'weatherapp/sunny.jpg' %}"); /* Always sunny background */
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
       transition: background-color 1s ease, background-image 1s ease;
     }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center" id="weather-body">
 
+<body class="min-h-screen flex items-center justify-center" id="weather-body">
   <div class="bg-white/30 backdrop-blur-md shadow-xl rounded-xl w-full max-w-3xl mx-auto p-8 space-y-6">
-    <!-- Logo -->
+
+    <!-- Logo and Tagline -->
     <div class="text-center">
       <img src="{% static 'weatherapp/logo.png' %}" alt="SkyCast Logo" class="mx-auto w-60 h-auto mb-2">
       <p class="text-sky-800">Forecast with Feeling</p>
     </div>
 
-    <!-- Form -->
+    <!-- Search Form -->
     <form method="POST" class="flex flex-col sm:flex-row items-center gap-4 justify-center">
       {% csrf_token %}
       <input type="text" name="city" placeholder="Enter city" class="flex-grow px-4 py-2 rounded-md border border-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sky-900" />
-      <button type="submit" class="bg-sky-700 hover:bg-sky-900 text-white px-6 py-2 rounded-md transition duration-300">Search</button>
+      <button type="submit" class="bg-sky-700 hover:bg-sky-900 text-white px-6 py-2 rounded-md transition duration-300">
+        Search
+      </button>
     </form>
 
     <!-- Weather Info -->
     {% if city %}
     <div class="flex flex-col md:flex-row justify-between items-center mt-6 bg-white/40 rounded-lg p-6">
+      <!-- Left Side: Temp + City -->
       <div class="text-center md:text-left space-y-2 md:w-1/2">
         <h2 class="text-5xl font-semibold text-sky-900">{{ temp }}&#176; C</h2>
         <h3 class="text-xl text-sky-700 uppercase tracking-wide">{{ city }}</h3>
       </div>
+
+      <!-- Right Side: Icon + Description -->
       <div class="text-center md:w-1/2 space-y-2 mt-4 md:mt-0">
         <img src="http://openweathermap.org/img/w/{{ icon }}.png" alt="Weather Icon" class="mx-auto w-28 h-28">
         <p class="text-sky-800 capitalize">{{ description }}</p>
@@ -44,6 +60,7 @@
       </div>
     </div>
 
+    <!-- Button: View More Forecast -->
     <div class="text-center mt-4">
       <form method="POST" action="{% url 'results' %}">
         {% csrf_token %}
@@ -53,8 +70,9 @@
         </button>
       </form>
     </div>
-    {% endif %} <!-- ✅ Properly closed the IF block -->
+    {% endif %}
 
+    <!-- Error Alert (City not found) -->
     {% if exception_occured %}
     <script>
       window.onload = function(){
@@ -64,32 +82,5 @@
     {% endif %}
 
   </div>
-
-  <script>
-    const weatherCondition = "{{ description|lower }}";
-    const body = document.getElementById('weather-body');
-
-    function updateWeatherTheme(condition) {
-      let imageUrl = "";
-
-      if (condition.includes("sunny") || condition.includes("clear")) {
-        imageUrl = "{% static 'weatherapp/sunny.jpg' %}";
-      } else if (condition.includes("rain")) {
-        imageUrl = "{% static 'weatherapp/rainy1.jpg' %}";
-      } else if (condition.includes("wind")) {
-        imageUrl = "{% static 'weatherapp/background-home.jpg' %}";
-      } else {
-        imageUrl = "{% static 'weatherapp/background-home.jpg' %}";
-      }
-
-      body.style.backgroundImage = `url('${imageUrl}')`;
-      body.style.backgroundSize = "cover";
-      body.style.backgroundRepeat = "no-repeat";
-      body.style.backgroundPosition = "center";
-    }
-
-    updateWeatherTheme(weatherCondition);
-  </script>
-
 </body>
 </html>

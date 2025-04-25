@@ -3,75 +3,164 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Weather Forecast</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
   <link rel="stylesheet" href="{% static 'weatherapp/weather.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="container">
-    <header class="top-bar">
-      <button id="darkModeToggle">Toggle Mode</button>
-      <form method="post" class="city-form">
-        <input type="text" name="city" placeholder="Enter city" required>
-        <button type="submit">Get Weather</button>
-      </form>
-    </header>
-
-    <section class="weather-info">
-      <h1>Weather in {{ city|title }}</h1>
-      <div class="main-info">
-        <img src="http://openweathermap.org/img/wn/{{ icon }}@2x.png" alt="weather icon">
-        <div class="info-text">
-          <p><strong>Temperature:</strong> {{ temp }}°C</p>
-          <p><strong>Condition:</strong> {{ description }}</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="details">
-      <div class="box">
-        <p><strong>Feels Like:</strong> {{ feels_like }}°C</p>
-        <p><strong>Humidity:</strong> {{ humidity }}%</p>
-        <p><strong>Pressure:</strong> {{ pressure }} hPa</p>
-        <p><strong>Wind:</strong> {{ wind_speed }} m/s at {{ wind_deg }}°</p>
-      </div>
-      <div class="box">
-        <p><strong>Visibility:</strong> {{ visibility }} m</p>
-        <p><strong>Cloudiness:</strong> {{ cloudiness }}%</p>
-        <p><strong>Sunrise:</strong> {{ sunrise }}</p>
-        <p><strong>Sunset:</strong> {{ sunset }}</p>
-        <p><strong>Precipitation:</strong> {{ precipitation }}</p>
-        <p><strong>UV Index:</strong> {{ uv_index }}</p>
-      </div>
-    </section>
-
-    <section class="suggestion">
-      <h2>Suggested Activity</h2>
-      <p>{% if suggestion %}{{ suggestion }}{% else %}No specific suggestion today. Take it easy or explore the city!{% endif %}</p>
-    </section>
-
-    <section class="forecast">
-      <h2>Weekly Forecast</h2>
-      <div class="forecast-grid">
-        {% for day in forecast_list %}
-        <div class="forecast-card">
-          <p class="day-name">{{ day.day_name }}</p>
-          <p class="date">{{ day.date }}</p>
-          <img src="http://openweathermap.org/img/wn/{{ day.icon }}@2x.png" alt="icon">
-          <p class="temp">{{ day.temp }}°C</p>
-          <p class="desc">{{ day.description }}</p>
-        </div>
-        {% endfor %}
-      </div>
-    </section>
-
-    <section class="chart">
-      <h2>Temperature Forecast</h2>
-      <canvas id="tempChart"></canvas>
-    </section>
+  <!-- top bar --------------------------------------------------------------- -->
+  <div class="top-bar">
+    <button id="darkModeToggle">Toggle Mode</button>
+    <form method="post" class="city-form">
+      {% csrf_token %}
+      <input type="text" name="city" placeholder="Enter city" required>
+      <button type="submit">Get Weather</button>
+    </form>
+    <a href="{% url 'home' %}" class="top-button">← Return to the main dashboard</a>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="weather.js"></script>
+  <!-- grid board ------------------------------------------------------------ -->
+  <main class="board">
+    <!-- left sidebar -->
+    <aside class="sidebar">
+
+      <!-- details card -->
+      <section class="card details">
+        <h3>Weather Details</h3>
+        <div class="stats-grid">
+          <p>
+            <span class="ico"><i class="wi wi-humidity mini-icon"></i></span>
+            Humidity {{ humidity }}%
+          </p>
+          
+          <p>
+            <span class="ico"><i class="wi wi-sunrise mini-icon"></i></span>
+            Sunrise {{ sunrise }}
+          </p>
+          
+          <p>
+            <span class="ico"><i class="wi wi-strong-wind mini-icon"></i></span>
+            Wind {{ wind_speed }} m/s
+          </p>
+          
+          <p>
+            <span class="ico"><i class="wi wi-sunset mini-icon"></i></span>
+            Sunset {{ sunset }}
+          </p>
+          
+          <p>
+            <span class="ico"><i class="wi wi-thermometer mini-icon"></i></span>
+            Feels Like {{ feels_like }}°C
+          </p>
+          
+          <p>
+            <span class="ico"><i class="wi wi-barometer mini-icon"></i></span>
+            Pressure {{ pressure }} hPa
+          </p>
+        </div>
+      </section>
+
+      <!-- suggested activity -->
+      <section class="card slim">
+        <div class="suggestion-box">
+          <div class="suggestion-header">
+            <h2>☁️SkyCast’s Pick</h2>
+          </div>
+          <p class="suggestion-text">{{ suggestion }}</p>
+        </div>
+      </section>
+    </aside>
+
+    <!-- centre column -->
+    <section class="centre">
+
+      <!-- current weather -->
+      <div class="card now">
+        <h2 class="city">Weather in {{ city|title }}</h2>
+
+        <div class="now-flex">
+          <div class="weather-summary">
+            <!-- big icon on the left -->
+            <i class="wi {{ icon_class }} big-icon"></i>
+          
+            <!-- temp label on the right, description underneath it -->
+            <div class="temp-stack">
+              <p class="temp-label">
+                Temperature
+                <span class="temp-value">{{ temp }}°C</span>
+              </p>
+          
+              <p class="cond-line">
+                <span class="ico"><i class="wi wi-day-cloudy mini-icon"></i></span>
+                {{ description|capfirst }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- weekly forecast -->
+      <div class="card forecast">
+        <h3>Weekly Forecast</h3>
+        <div class="week-flex">
+          {% for day in forecast_list %}
+          <div class="mini">
+            <p class="day">{{ day.day_name|slice:":3" }}</p>
+            <img src="http://openweathermap.org/img/wn/{{ day.icon }}.png" alt="">
+            <p class="deg">{{ day.temp|floatformat:0 }}°</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- right chart -->
+    <section class="card chart">
+      <h3>Temp / Humidity</h3>
+      <canvas id="tempChart"></canvas>
+
+      <!-- Moved UV Index here -->
+      <div class="uv-wrap" style="margin-top: 3rem; width: 420px;margin-left: -17px;">
+        <p>UV Index: {{ uv_index }}</p>
+        <div class="uv-bar">
+          <div class="uv-fill"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  {{ forecast_list|json_script:"forecast-data" }}
+
+  <script>
+    /* chart --------------------------------------------------------------- */
+    const d = JSON.parse(document.getElementById('forecast-data').textContent);
+    new Chart(document.getElementById('tempChart'),{
+      type:'line',
+      data:{
+        labels:d.map(x=>x.day_name),
+        datasets:[
+          {label:'Temp °C',data:d.map(x=>x.temp),
+           borderColor:'#38bdf8', backgroundColor:'rgba(56,189,248,.15)',fill:true,tension:.3},
+          {label:'Humidity %',data:d.map(x=>x.humidity),
+           borderColor:'#f97316', backgroundColor:'rgba(249,115,22,.15)',fill:false,tension:.3}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false}
+    });
+
+    /* UV bar width -------------------------------------------------------- */
+    const uvVal = parseFloat('{{ uv_index }}');
+    document.querySelector('.uv-fill').style.width =
+        Math.min(uvVal*8,100)+'%';            /* 0‑12 → 0‑96% */
+
+    /* dark‑mode toggle ---------------------------------------------------- */
+    document.getElementById('darkModeToggle')
+            .onclick=()=>document.documentElement.classList.toggle('dark-mode');
+  </script>
 </body>
 </html>
